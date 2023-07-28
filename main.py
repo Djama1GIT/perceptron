@@ -1,27 +1,18 @@
-import random
-import sys
-
 import numpy as np
-
-sys.setrecursionlimit(2000000)
-
-
-def foo(a, b, c, d, e, f):
-    return a and b and c or d or (not e) and f or a and f
 
 
 class Perceptron:
     def __init__(self, _inputs, _outputs):
         self.inputs = _inputs
         self.outputs = _outputs
-        self.synapses = 2 * np.random.random((6, 1)) - 1
+        self.synapses = 2 * np.random.random((len(self.inputs[0]), 1)) - 1
 
     def __call__(self, *args, **kwargs):
         self.backpropagation()
         return self.synapses
 
     def backpropagation(self):
-        for i in range(10000):
+        for i in range(20000):
             __input = self.inputs
             __outputs = Perceptron.sigmoid(np.dot(__input, self.synapses))
 
@@ -35,48 +26,35 @@ class Perceptron:
         return 1 / (1 + np.exp(-x))
 
 
-test_count = 0
+inputs = np.array([
+    [0, 0, 1],
+    [1, 1, 1],
+    [1, 0, 1],
+    [0, 1, 1],
+])
 
+outputs = np.array([
+    [0],
+    [1],
+    [1],
+    [0],
+])
 
-def test_perceptron():
-    try:
-        global test_count
-        test_count += 1
-        inputs = []
-        for a in [0, 1]:
-            for b in [0, 1]:
-                for c in [0, 1]:
-                    for d in [0, 1]:
-                        for e in [0, 1]:
-                            for f in [0, 1]:
-                                if random.randint(0, 1):
-                                    inputs += [[a, b, c, d, e, f]]
-                                    # Интересный факт: если в инпут поместить все данные,
-                                    # то выйдет НИЧЕГО
+perceptron = Perceptron(inputs, outputs)
+print(f"[Synapses]:\n>>> " + '\n>>> '.join(map(str, perceptron())))
+print()
 
-        inputs = np.array(inputs)
-        outputs = np.array([[foo(*i) for i in inputs]]).T
-        perceptron = Perceptron(inputs, outputs)
-        perceptron()
-        for a in [0, 1]:
-            for b in [0, 1]:
-                for c in [0, 1]:
-                    for d in [0, 1]:
-                        for e in [0, 1]:
-                            for f in [0, 1]:
-                                print((a, b, c, d, e, f), foo(a, b, c, d, e, f),
-                                      Perceptron.sigmoid(np.dot(
-                                          np.array([a, b, c, d, e, f]), perceptron.synapses)
-                                      )[0])
-                                assert (foo(a, b, c, d, e, f) == 1) == (round(
-                                    Perceptron.sigmoid(np.dot(
-                                        np.array([a, b, c, d, e, f]), perceptron.synapses)
-                                    )[0]) > 0.5) or print(f"Тест #{test_count} Не прошел")
-        else:
-            print(inputs)
-            print(f"Тест #{test_count} пройден. Перцептрон работает.")  # я пытался, не вышло
-    except:
-        test_perceptron()
+test_input = [1, 1, 0]
+test_output = Perceptron.sigmoid(np.dot(np.array(test_input), perceptron.synapses))
+print(f"[INPUT]: ({', '.join(list(map(str, test_input)))})")
+print(f">>> [RESULT]: {round(test_output[0])} ({test_output[0]})")
 
+"""
+[Synapses]:
+>>> [9.6734331]
+>>> [-0.20781427]
+>>> [-4.6298744]
 
-test_perceptron()
+[INPUT]: (1, 1, 0)
+>>> [RESULT]: 1 (0.9999225359268941)
+"""
